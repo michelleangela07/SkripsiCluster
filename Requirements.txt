@@ -1,0 +1,6 @@
+scikit-learn
+matplotlib
+plotly
+folium
+streamlit_folium
+openpyxl
