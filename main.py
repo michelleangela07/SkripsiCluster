@@ -1,3 +1,4 @@
+import streamlit as st
 import pandas as pd
 from sklearn.cluster import KMeans
 from sklearn.metrics import silhouette_score, silhouette_samples
@@ -5,13 +6,13 @@ import matplotlib.pyplot as plt
 import numpy as np
 import folium
 from streamlit_folium import folium_static
-import streamlit as st
 import plotly.express as px
 import io
+from yellowbrick.cluster import SilhouetteVisualizer
 
 # Function to load data
 def load_data(file):
-    data = pd.read_excel(file, engine='openpyxl')  # Use engine='openpyxl' for reading .xlsx files
+    data = pd.read_excel(file, engine='openpyxl')
     return data
 
 # Function to display dataset and download button
@@ -32,10 +33,46 @@ def dataset(df, file_name):
         key=f"download_button_{file_name}"
     )
 
+def perform_clustering(dft, data, n_clusters, random_state, show_silhouette_visualization, show_scatter_plot):
+    kmeans = KMeans(n_clusters=n_clusters, random_state=random_state).fit(data)
+    ClusLabel = kmeans.labels_
+
+    # DataFrame dengan Cluster Labels
+    dft_labeled = dft.copy()
+    dft_labeled['Cluster'] = ClusLabel
+
+    # Tampilkan hanya kolom 'Cluster' pada dataset
+    st.subheader("Label")
+    cluster_column = dft_labeled['Cluster']
+    st.write(cluster_column)
+
+    # Mendapatkan posisi centroid dari setiap kluster
+    centroids = kmeans.cluster_centers_
+
+    # Visualisasi Silhouette
+    if show_silhouette_visualization:
+        st.subheader("Visualisasi Silhouette")
+        Visual = SilhouetteVisualizer(kmeans, colors='yellowbrick')
+        Visual.fit(data, ClusLabel)
+        st.pyplot(plt.gcf())
+
+        # Rata-rata Silhouette Score
+        rata_silhouette = silhouette_score(data, ClusLabel)
+        st.write(f'Nilai Rata-Rata Silhouette dengan {n_clusters} Cluster : ', rata_silhouette)
+
+    # Menampilkan scatter plot
+    if show_scatter_plot:
+        st.header("Scatter Plot")
+        plt.figure(figsize=(10, 8))
+        for i in range(n_clusters):
+            plt.scatter(dft[ClusLabel == i].iloc[:, 0], dft[ClusLabel == i].iloc[:, 1], label=f'Cluster {i + 1}')
+        plt.scatter(centroids[:, 0], centroids[:, 1], c='black', marker='x', label='Centroids')
+        plt.title('Scatter Plot of Clusters')
+        plt.legend()
+        st.pyplot(plt.gcf())
+
 def generate_map():
-    # Membuat peta Pulau Jawa menggunakan folium
     m = folium.Map(location=[-7.6145, 110.7121], zoom_start=7, width=800, height=600)
-    #m = folium.Map(location=[-7.6145, 110.7121], zoom_start=7)
 
     # Menambahkan marker untuk setiap kota dalam cluster 1 (biru)
     cluster_1 = [
@@ -115,9 +152,6 @@ if menu_select == 'Halaman Utama':
     # Path menuju folder gambar
     image_folder_path = "img"
 
-    # Menentukan teks subheader sesuai pilihan pengguna
-    #st.subheader(f"Pola Data Tren {trend_choices} untuk {parameter_choices}")
-
     # Dropdown untuk memilih cluster
     selected_cluster = st.selectbox("Silahkan Pilih Cluster atau Perbandingan", ["Cluster 1", "Cluster 2", "Cluster 3", "Perbandingan"])
 
@@ -138,9 +172,7 @@ if menu_select == 'Halaman Utama':
 
         trend_suffixp = selected_rgp.lower()[0]
         image_path = f"P{trend_suffixp}_{selected_prp.lower()}.png"
-        #image_path = f"Pt_{selected_prp.lower()}.png"
         st.subheader(f"Perbandingan Pola Data Tren {selected_rgp} {selected_prp}")
-        #st.subheader(f"Perbandingan Pola Data Tren {selected_prp}")
         st.image(image_path)
 
 #Eksperimen
@@ -155,84 +187,24 @@ elif menu_select == 'Eksperimen':
         st.write("Di bawah ini merupakan dataset yang diunggah:")
         st.dataframe(dft)
 
+        data = dft.to_numpy()
+
         # Pilihan parameter
         st.header("Parameter Clustering")
         n_clusters = st.slider("Jumlah Cluster", min_value=2, max_value=10, value=3, step=1)
         random_state = st.number_input("Random State", value=0)
 
         show_silhouette_visualization = st.checkbox("Tampilkan Visualisasi Silhouette", value=True)
-        #show_cluster_visualization = st.checkbox("Tampilkan Visualisasi Cluster", value=True)
         show_scatter_plot = st.checkbox("Tampilkan Scatter Plot", value=True)
 
         # Tombol
         if st.button("Lihat Hasil"):
-            # Hitung nilai silhouette untuk jumlah cluster yang dipilih oleh pengguna
-            kmeans = KMeans(n_clusters=n_clusters)
-            kmeans.fit(dft)
+            perform_clustering(dft, data, n_clusters, random_state, show_silhouette_visualization, show_scatter_plot)
 
-            silhouette_avg = silhouette_score(dft, kmeans.labels_)
-            sample_silhouette_values = silhouette_samples(dft, kmeans.labels_)
-
-            # Mendapatkan label kluster untuk setiap data point
-            labels = kmeans.labels_
-
-            # Mendapatkan posisi centroid dari setiap kluster
-            centroids = kmeans.cluster_centers_
-
-            # Tambahkan kolom Cluster ke DataFrame dft
-            dft['Cluster'] = kmeans.labels_
-
-            # Tampilkan hanya kolom 'Cluster' pada dataset
-            st.subheader("Label Cluster")
-            st.write(f"Di bawah ini merupakan tabel label untuk {n_clusters} cluster.")
-            cluster_column = dft['Cluster']
-            st.write(cluster_column)
-
-            # Menampilkan visualisasi silhouette
-            if show_silhouette_visualization:
-                st.header("Visualisasi Silhouette")
-                fig, ax = plt.subplots()
-                y_lower = 10
-                for i in range(n_clusters):
-                    ith_cluster_silhouette_values = sample_silhouette_values[kmeans.labels_ == i]
-                    ith_cluster_silhouette_values.sort()
-                    size_cluster_i = ith_cluster_silhouette_values.shape[0]
-                    y_upper = y_lower + size_cluster_i
-                    color = plt.cm.Spectral(float(i) / n_clusters)
-                    ax.fill_betweenx(np.arange(y_lower, y_upper),
-                                      0, ith_cluster_silhouette_values,
-                                      facecolor=color, edgecolor=color, alpha=0.7)
-                    ax.text(-0.05, y_lower + 0.5 * size_cluster_i, str(i))
-                    y_lower = y_upper + 10
-                #ax.set_title("Silhouette Plot")
-                #ax.set_xlabel("Silhouette Coefficient Values")
-                #ax.set_ylabel("Cluster Label")
-                ax.axvline(x=silhouette_avg, color="red", linestyle="--")
-                ax.set_yticks([])
-                ax.set_xticks([-0.1, 0, 0.2, 0.4, 0.6, 0.8, 1])
-
-                st.pyplot(fig)
-
-                # Menampilkan nilai rata-rata silhouette
-                st.write(f"Nilai rata-rata silhouette: {silhouette_avg}")
-
-            ## Menampilkan visualisasi cluster
-            #if show_cluster_visualization:
-                #st.header("Visualisasi Cluster")
-                #fig = px.scatter(dft, x=dft.columns[0], y=dft.columns[1], color='Cluster', hover_name=dft.index,
-                          #color_continuous_scale=['blue', 'red'])
-                #st.plotly_chart(fig)
-
-            # Menampilkan scatter plot
-            if show_scatter_plot:
-                st.header("Scatter Plot")
-                plt.figure(figsize=(10, 8))
-                for i in range(n_clusters):
-                    plt.scatter(dft[labels == i].iloc[:, 0], dft[labels == i].iloc[:, 1], label=f'Cluster {i + 1}')
-                plt.scatter(centroids[:, 0], centroids[:, 1], c='black', marker='x', label='Centroids')
-                plt.title('Scatter Plot of Clusters')
-                plt.legend()
-                st.pyplot(plt.gcf())
+        # Reset the checkbox values after clustering
+        display_scatter_plot = False
+        display_line_plot = False
+        display_heatmap = False
 
 # Dataset
 elif menu_select == 'Dataset':
@@ -257,7 +229,6 @@ elif menu_select == 'Dataset':
 #About
 elif menu_select == 'About':
     st.title("About")
-    #st.write("Welcome to the About Page!")
 
     st.header("Tentang Program")
     st.write("Ini merupakan sebuah program yang dirancang untuk memenuhi tugas akhir saya sebagai mahasiswa tingkat akhir yang saat ini sedang berkuliah di Universitas Tarumanagara jurusan Teknik Informatika angkatan 2020. Topik tugas akhir yang saya ambil adalah Clustering Harga Pangan di Pasar Modern Pulau Jawa Menggunakan K-Means. Program ini juga dibuat dengan tujuan untuk memberikan informasi seputar harga pangan kepada masyarakat di Pulau Jawa.")
@@ -275,10 +246,6 @@ elif menu_select == 'About':
 
     st.header("Tentang Perancang")
     st.write("Di bawah ini merupakan identitas diri saya selaku perancang program ini.")
-    ## Path menuju gambar lokal
-    #image_path = "profilMichelle.jpg"
-    ## Tampilkan gambar
-    #st.image(image_path, width=200)
     st.write("<b>Nama Lengkap:</b> Michelle Angela Thena", unsafe_allow_html=True)
     st.write("<b>Universitas Asal:</b> Universitas Tarumanagara", unsafe_allow_html=True)
     st.write("<b>NIM:</b> 535200020", unsafe_allow_html=True)
