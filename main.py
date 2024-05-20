@@ -9,7 +9,6 @@ import folium
 from streamlit_folium import folium_static
 import plotly.express as px
 import io
-#from yellowbrick.cluster import SilhouetteVisualizer
 
 # Function to load data
 def load_data(file):
@@ -34,7 +33,7 @@ def dataset(df, file_name):
         key=f"download_button_{file_name}"
     )
 
-def perform_clustering(dft, data, n_clusters, random_state, show_silhouette_visualization, show_scatter_plot):
+def perform_clustering(dft, data, n_clusters, random_state, show_silhouette_visualization):
     kmeans = KMeans(n_clusters=n_clusters, random_state=random_state).fit(data)
     ClusLabel = kmeans.labels_
 
@@ -75,9 +74,9 @@ def perform_clustering(dft, data, n_clusters, random_state, show_silhouette_visu
 
             y_lower = y_upper + 10
 
-        #plt.title("Silhouette plot")
-        plt.xlabel("Silhouette coefficient")
-        plt.ylabel("Cluster label")
+        plt.title("Silhouette Plot")
+        plt.xlabel("Silhouette Coefficient")
+        plt.ylabel("Cluster Label")
 
         plt.axvline(x=silhouette_avg, color="red", linestyle="--")
 
@@ -88,17 +87,6 @@ def perform_clustering(dft, data, n_clusters, random_state, show_silhouette_visu
 
         # Rata-rata Silhouette Score
         st.write(f'Nilai Rata-Rata Silhouette dengan {n_clusters} Cluster : ', silhouette_avg)
-
-    # Menampilkan scatter plot
-    if show_scatter_plot:
-        st.header("Scatter Plot")
-        plt.figure(figsize=(10, 8))
-        for i in range(n_clusters):
-            plt.scatter(dft[ClusLabel == i].iloc[:, 0], dft[ClusLabel == i].iloc[:, 1], label=f'Cluster {i + 1}')
-        plt.scatter(centroids[:, 0], centroids[:, 1], c='black', marker='x', label='Centroids')
-        plt.title('Scatter Plot of Clusters')
-        plt.legend()
-        st.pyplot(plt.gcf())
 
 def generate_map():
     m = folium.Map(location=[-7.6145, 110.7121], zoom_start=7, width=800, height=600)
@@ -224,16 +212,13 @@ elif menu_select == 'Eksperimen':
         random_state = st.number_input("Random State", value=0)
 
         show_silhouette_visualization = st.checkbox("Tampilkan Visualisasi Silhouette", value=True)
-        show_scatter_plot = st.checkbox("Tampilkan Scatter Plot", value=True)
 
         # Tombol
         if st.button("Lihat Hasil"):
-            perform_clustering(dft, data, n_clusters, random_state, show_silhouette_visualization, show_scatter_plot)
+            perform_clustering(dft, data, n_clusters, random_state, show_silhouette_visualization)
 
         # Reset the checkbox values after clustering
-        display_scatter_plot = False
-        display_line_plot = False
-        display_heatmap = False
+        show_silhouette_visualization = False
 
 # Dataset
 elif menu_select == 'Dataset':
