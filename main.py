@@ -1,14 +1,15 @@
 import streamlit as st
 import pandas as pd
+import numpy as np
 from sklearn.cluster import KMeans
 from sklearn.metrics import silhouette_score, silhouette_samples
 import matplotlib.pyplot as plt
-import numpy as np
+import matplotlib.cm as cm
 import folium
 from streamlit_folium import folium_static
 import plotly.express as px
 import io
-from yellowbrick.cluster import SilhouetteVisualizer
+#from yellowbrick.cluster import SilhouetteVisualizer
 
 # Function to load data
 def load_data(file):
@@ -52,13 +53,41 @@ def perform_clustering(dft, data, n_clusters, random_state, show_silhouette_visu
     # Visualisasi Silhouette
     if show_silhouette_visualization:
         st.subheader("Visualisasi Silhouette")
-        Visual = SilhouetteVisualizer(kmeans, colors='yellowbrick')
-        Visual.fit(data, ClusLabel)
+        silhouette_avg = silhouette_score(data, ClusLabel)
+        sample_silhouette_values = silhouette_samples(data, ClusLabel)
+
+        y_lower = 10
+        for i in range(n_clusters):
+            ith_cluster_silhouette_values = \
+                sample_silhouette_values[ClusLabel == i]
+
+            ith_cluster_silhouette_values.sort()
+
+            size_cluster_i = ith_cluster_silhouette_values.shape[0]
+            y_upper = y_lower + size_cluster_i
+
+            color = cm.nipy_spectral(float(i) / len(np.unique(ClusLabel)))
+            plt.fill_betweenx(np.arange(y_lower, y_upper),
+                            0, ith_cluster_silhouette_values,
+                            facecolor=color, edgecolor=color, alpha=0.7)
+
+            plt.text(-0.05, y_lower + 0.5 * size_cluster_i, str(i))
+
+            y_lower = y_upper + 10
+
+        #plt.title("Silhouette plot")
+        plt.xlabel("Silhouette coefficient")
+        plt.ylabel("Cluster label")
+
+        plt.axvline(x=silhouette_avg, color="red", linestyle="--")
+
+        plt.yticks([])
+        plt.xticks([-0.1, 0, 0.2, 0.4, 0.6, 0.8, 1])
+
         st.pyplot(plt.gcf())
 
         # Rata-rata Silhouette Score
-        rata_silhouette = silhouette_score(data, ClusLabel)
-        st.write(f'Nilai Rata-Rata Silhouette dengan {n_clusters} Cluster : ', rata_silhouette)
+        st.write(f'Nilai Rata-Rata Silhouette dengan {n_clusters} Cluster : ', silhouette_avg)
 
     # Menampilkan scatter plot
     if show_scatter_plot:
