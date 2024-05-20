@@ -74,7 +74,7 @@ def perform_clustering(dft, data, n_clusters, random_state, show_silhouette_visu
 
             y_lower = y_upper + 10
 
-        plt.title("Silhouette Plot")
+        plt.title("Visualisasi Silhouette Plot")
         plt.xlabel("Silhouette Coefficient")
         plt.ylabel("Cluster Label")
 
@@ -93,9 +93,11 @@ def perform_clustering(dft, data, n_clusters, random_state, show_silhouette_visu
         st.header("Scatter Plot")
         plt.figure(figsize=(10, 8))
         for i in range(n_clusters):
-            plt.scatter(dft[ClusLabel == i].iloc[:, 0], dft[ClusLabel == i].iloc[:, 10], label=f'Cluster {i + 1}')
+            plt.scatter(dft[ClusLabel == i].iloc[:, 0], dft[ClusLabel == i].iloc[:, 1000], label=f'Cluster {i + 1}')
         plt.scatter(centroids[:, 0], centroids[:, 1], c='black', marker='x', label='Centroids')
-        plt.title('Scatter Plot of Clusters')
+        plt.title('Visualisasi Scatter Plot')
+        plt.xlabel("Fitur 1")
+        plt.ylabel("Fitur 2")
         plt.legend()
         st.pyplot(plt.gcf())
 
