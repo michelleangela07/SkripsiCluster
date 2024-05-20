@@ -93,8 +93,8 @@ def perform_clustering(dft, data, n_clusters, random_state, show_silhouette_visu
         st.header("Scatter Plot")
         plt.figure(figsize=(10, 8))
         for i in range(n_clusters):
-            plt.scatter(dft[ClusLabel == i].iloc[:, 0], dft[ClusLabel == i].iloc[:, -1], label=f'Cluster {i + 1}')
-        plt.scatter(centroids[:, 0], centroids[:, -1], c='black', marker='x', label='Centroids')
+            plt.scatter(dft[ClusLabel == i].iloc[:, 0], dft[ClusLabel == i].iloc[:, len(dft.columns) // 2], label=f'Cluster {i + 1}')
+        plt.scatter(centroids[:, 0], centroids[:, len(dft.columns) // 2], c='black', marker='x', label='Centroids')
         plt.title('Visualisasi Scatter Plot')
         plt.xlabel("Fitur 1")
         plt.ylabel("Fitur 2")
