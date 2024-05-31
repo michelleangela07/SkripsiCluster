@@ -175,7 +175,7 @@ if menu_select == 'Halaman Utama':
     folium_static(generate_map())
 
     st.header("Hasil Percobaan")
-    st.write("Parameter yang digunakan adalah beras, telur ayam, daging ayam, daging sapi, bawang merah, bawang putih, cabai merah keriting, cabai rawit hijau, cabai rawit merah, minyak goreng, dan gula pasir.")
+    st.write("Komoditas pangan yang digunakan adalah beras, telur ayam, daging ayam, daging sapi, bawang merah, bawang putih, cabai merah keriting, cabai rawit hijau, cabai rawit merah, minyak goreng, dan gula pasir.")
 
     # Path menuju folder gambar
     image_folder_path = "img"
