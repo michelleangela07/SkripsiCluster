@@ -186,7 +186,7 @@ if menu_select == 'Halaman Utama':
     # Menampilkan gambar sesuai pilihan
     if selected_cluster in ["Cluster 1", "Cluster 2", "Cluster 3"]:
         selected_rg = st.selectbox("Pilih Tren Waktu", ["Tahunan", "Bulanan"], key="tren_waktu")
-        selected_pr = st.selectbox("Pilih Parameter", ["Beras", "Telur Ayam", "Daging Ayam", "Daging Sapi", "Bawang Merah", "Bawang Putih", "Cabai Merah Keriting", "Cabai Rawit Hijau", "Cabai Rawit Merah", "Minyak Goreng", "Gula Pasir"], key="parameter")
+        selected_pr = st.selectbox("Pilih Komoditas Pangan", ["Beras", "Telur Ayam", "Daging Ayam", "Daging Sapi", "Bawang Merah", "Bawang Putih", "Cabai Merah Keriting", "Cabai Rawit Hijau", "Cabai Rawit Merah", "Minyak Goreng", "Gula Pasir"], key="parameter")
 
         cluster_number = selected_cluster[-1]
         trend_suffix = selected_rg.lower()[0]
