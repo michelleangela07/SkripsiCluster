@@ -50,7 +50,7 @@ def perform_clustering(dft, data, n_clusters, random_state, show_silhouette_visu
     cluster_results = pd.DataFrame(columns=['Cluster', 'Kota'])
     for i in range(n_clusters):
         cities_in_cluster = dft_labeled[dft_labeled['Cluster'] == i].index.tolist()
-        cluster_results = cluster_results.append({'Cluster': i, 'Kota': ', '.join(cities_in_cluster)}, ignore_index=True)
+        cluster_results.loc[i] = [i, ', '.join(cities_in_cluster)]
     
     # Tampilkan tabel dalam Streamlit
     st.table(cluster_results)
