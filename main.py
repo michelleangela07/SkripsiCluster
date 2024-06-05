@@ -33,7 +33,7 @@ def dataset(df, file_name):
         key=f"download_button_{file_name}"
     )
 
-def perform_clustering(dft, data, n_clusters, random_state, show_silhouette_visualization, show_scatter_plot):
+def perform_clustering(dft, data, n_clusters, random_state, show_silhouette_visualization):
     kmeans = KMeans(n_clusters=n_clusters, random_state=random_state).fit(data)
     ClusLabel = kmeans.labels_
 
@@ -86,18 +86,6 @@ def perform_clustering(dft, data, n_clusters, random_state, show_silhouette_visu
 
         # Rata-rata Silhouette Score
         st.write(f'Nilai Rata-Rata Silhouette dengan {n_clusters} Cluster : ', silhouette_avg)
-
-    # Menampilkan scatter plot
-    if show_scatter_plot:
-        st.header("Scatter Plot")
-        plt.figure(figsize=(10, 8))
-        for i in range(n_clusters):
-            plt.scatter(dft[ClusLabel == i].iloc[:, 0], dft[ClusLabel == i].iloc[:, 1], label=f'Cluster {i + 1}')
-        plt.scatter(centroids[:, 0], centroids[:, 1], c='black', marker='x', label='Centroids')
-        plt.xlabel("Fitur 1")
-        plt.ylabel("Fitur 2")
-        plt.legend()
-        st.pyplot(plt.gcf())
 
 def generate_map():
     m = folium.Map(location=[-7.6145, 110.7121], zoom_start=7, width=800, height=600)
@@ -223,15 +211,13 @@ elif menu_select == 'Eksperimen':
         random_state = st.number_input("Random State", value=0)
 
         show_silhouette_visualization = st.checkbox("Tampilkan Visualisasi Silhouette", value=True)
-        show_scatter_plot = st.checkbox("Tampilkan Scatter Plot", value=True)
 
         # Tombol
         if st.button("Lihat Hasil"):
-            perform_clustering(dft, data, n_clusters, random_state, show_silhouette_visualization, show_scatter_plot)
+            perform_clustering(dft, data, n_clusters, random_state, show_silhouette_visualization)
 
         # Reset the checkbox values after clustering
         show_silhouette_visualization = False
-        show_scatter_plot = False
 
 # Dataset
 elif menu_select == 'Dataset':
