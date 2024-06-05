@@ -47,7 +47,7 @@ def perform_clustering(dft, data, n_clusters, random_state, show_silhouette_visu
     st.write(cluster_column)
 
     # Membuat tabel berisi nama cluster dan nama kota
-    cluster_results = pd.DataFrame({'Kota': df.index})
+    cluster_results = pd.DataFrame({'Cluster': ClusLabel, 'Kota': dft.index})
     cluster_results = cluster_results.sort_values(by='Cluster')
     # Tampilkan tabel dalam Streamlit
     st.table(cluster_results)
