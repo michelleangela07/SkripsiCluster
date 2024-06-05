@@ -42,12 +42,13 @@ def perform_clustering(dft, data, n_clusters, random_state, show_silhouette_visu
     dft_labeled['Cluster'] = ClusLabel
 
     # Tampilkan hanya kolom 'Cluster' pada dataset
-    st.subheader("Label")
+    st.subheader("Hasil Clustering")
+    st.write(f'Di bawah ini akan ditampilkan hasil clustering dari {n_clusters} cluster.')
     cluster_column = dft_labeled['Cluster']
     st.write(cluster_column)
 
     # Membuat tabel berisi nama cluster dan nama kota
-    st.subheader("Hasil Clustering")
+    st.write('Tabel anggota dari masing-masing cluster.')
     cluster_results = pd.DataFrame(columns=['Kota'])
     for i in range(n_clusters):
         cities_in_cluster = dft_labeled[dft_labeled['Cluster'] == i].index.tolist()
