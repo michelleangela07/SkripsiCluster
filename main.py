@@ -46,6 +46,12 @@ def perform_clustering(dft, data, n_clusters, random_state, show_silhouette_visu
     cluster_column = dft_labeled['Cluster']
     st.write(cluster_column)
 
+    # Membuat tabel berisi nama cluster dan nama kota
+    cluster_results = pd.DataFrame({'Cluster': labels, 'Kota': df.index})
+    cluster_results = cluster_results.sort_values(by='Cluster')
+    # Tampilkan tabel dalam Streamlit
+    st.table(cluster_results)
+
     # Mendapatkan posisi centroid dari setiap kluster
     centroids = kmeans.cluster_centers_
 
