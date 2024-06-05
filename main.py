@@ -47,7 +47,7 @@ def perform_clustering(dft, data, n_clusters, random_state, show_silhouette_visu
     st.write(cluster_column)
 
     # Membuat tabel berisi nama cluster dan nama kota
-    cluster_results = pd.DataFrame({'Cluster': ClusLabel, 'Kota': df.index})
+    cluster_results = pd.DataFrame({'Kota': df.index})
     cluster_results = cluster_results.sort_values(by='Cluster')
     # Tampilkan tabel dalam Streamlit
     st.table(cluster_results)
@@ -71,7 +71,7 @@ def perform_clustering(dft, data, n_clusters, random_state, show_silhouette_visu
             size_cluster_i = ith_cluster_silhouette_values.shape[0]
             y_upper = y_lower + size_cluster_i
 
-            color = cm.nipy_spectral(float(i) / len(np.unique(ClusLabel)))
+            color = cm.nipy_spectral(float(i) / n_clusters)
             plt.fill_betweenx(np.arange(y_lower, y_upper),
                             0, ith_cluster_silhouette_values,
                             facecolor=color, edgecolor=color, alpha=0.7)
